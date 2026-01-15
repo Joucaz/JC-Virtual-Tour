@@ -56,15 +56,23 @@
     </script>
 </head>
 <body>
-
-    <div id="canvas-container"></div>
-    <div id="loader">Chargement du tour...</div>
+    <!-- Container pour le canvas Three.js -->
+    <div id="canvas-container">
+        <canvas class="webgl"></canvas>
+    </div>
+    
+    <!-- Loader pendant chargement -->
+    <div id="loader">
+        <div class="loader-text">Chargement du tour...</div>
+    </div>
+    
+    <!-- Message si client suspendu -->
     <div id="suspended-message">
-        <h2>Tour temporairement indisponible</h2>
+        <h2>🚫 Tour temporairement indisponible</h2>
         <p>Veuillez contacter votre prestataire.</p>
     </div>
     
-    <script type="module" src="/src/script.js"></script>
+    <script type="module" src="script.js"></script>
 
     <!-- <canvas class="webgl"></canvas>
 
