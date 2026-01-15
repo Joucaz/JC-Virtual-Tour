@@ -3,6 +3,7 @@ import Experience from '../Experience.js'
 import Room360 from './Room360.js'
 import Hotspot from './Hotspot.js'
 import Raycaster from '../Utils/Raycaster.js'
+import RoomTransition from '../Utils/RoomTransition.js'
 
 /**
  * World - Gère tout le tour 360°
@@ -23,8 +24,12 @@ export default class World {
         // Données du tour (sera chargé depuis API plus tard)
         this.tourData = null
         
+        this.preloadedTextures = new Map()
+
         // Raycaster pour les clics
         this.raycaster = new Raycaster()
+
+        this.roomTransition = new RoomTransition()
 
         // Debug
         if(this.debug.active) {
@@ -103,11 +108,13 @@ export default class World {
             ]
         }
 
-        // Charger la première room
-        const startRoom = this.tourData.rooms.find(r => r.isStart)
-        if(startRoom) {
-            this.loadRoom(startRoom.id)
-        }
+        // Précharger toutes les textures AVANT de charger la première room
+        this.preloadAllTextures().then(() => {
+            const startRoom = this.tourData.rooms.find(r => r.isStart)
+            if(startRoom) {
+                this.loadRoom(startRoom.id)
+            }
+        })
     }
 
     /**
@@ -150,7 +157,7 @@ export default class World {
     }
 
     /**
-     * Charger une room par son ID
+     * Charger une room par son ID (avec transition)
      */
     loadRoom(roomId) {
         console.log('🚪 Chargement de la room:', roomId)
@@ -163,18 +170,28 @@ export default class World {
             return
         }
 
-        // 1. Nettoyer l'ancienne room si elle existe
-        if(this.currentRoom) {
-            this.clearCurrentRoom()
+        if(!this.currentRoom) {
+            // Utiliser la texture préchargée
+            const preloadedTexture = this.preloadedTextures.get(roomId)
+            this.currentRoom = new Room360(roomData.imageUrl, roomData, preloadedTexture)
+            this.createHotspots(roomData.hotspots)
+            console.log('✅ Room chargée:', roomData.name)
+            return
         }
 
-        // 2. Créer la nouvelle room 360°
-        this.currentRoom = new Room360(roomData.imageUrl, roomData)
-
-        // 3. Créer les hotspots de cette room
-        this.createHotspots(roomData.hotspots)
-
-        console.log('✅ Room chargée:', roomData.name)
+        // Transition avec texture préchargée
+        const preloadedTexture = this.preloadedTextures.get(roomId)
+        const newRoom = new Room360(roomData.imageUrl, roomData, preloadedTexture)
+        
+        const oldRoom = this.currentRoom
+        this.clearHotspots()
+        
+        this.roomTransition.transition(oldRoom, newRoom, () => {
+            oldRoom.destroy()
+            this.currentRoom = newRoom
+            this.createHotspots(roomData.hotspots)
+            console.log('✅ Room chargée:', roomData.name)
+        })
     }
 
     /**
@@ -194,6 +211,39 @@ export default class World {
         })
 
         console.log(`✅ ${hotspotsData.length} hotspots créés`)
+    }
+
+    /**
+     * Précharger toutes les textures du tour
+     */
+    async preloadAllTextures() {
+        console.log('📦 Préchargement de toutes les rooms...')
+        
+        const promises = this.tourData.rooms.map(room => {
+            return new Promise((resolve) => {
+                const loader = new THREE.TextureLoader()
+                loader.load(
+                    room.imageUrl,
+                    (texture) => {
+                        texture.colorSpace = THREE.SRGBColorSpace
+                        texture.minFilter = THREE.LinearFilter
+                        texture.magFilter = THREE.LinearFilter
+                        
+                        this.preloadedTextures.set(room.id, texture)
+                        console.log(`✅ ${room.name} préchargée`)
+                        resolve()
+                    },
+                    undefined,
+                    (error) => {
+                        console.error(`❌ Erreur ${room.name}:`, error)
+                        resolve() // On continue même si erreur
+                    }
+                )
+            })
+        })
+        
+        await Promise.all(promises)
+        console.log('🎉 Toutes les rooms sont préchargées !')
     }
 
     /**
