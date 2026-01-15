@@ -24,7 +24,7 @@ export default class Environment
             this.debugFolder = this.debug.ui.addFolder('environment')
         }
 
-        this.setLights()
+        // this.setLights()
         
         // this.setEnvironmentMap()
     }

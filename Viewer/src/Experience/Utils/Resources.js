@@ -25,40 +25,40 @@ export default class Resources extends EventEmitter
     }
 
     setLoadingManager() {
-        const loaderElement = document.getElementById('loader');
-        const loaderDisappear = document.querySelector('.loader-disappear');
-        const loaderBar = document.querySelector('.loader-bar-fill');
-        const loaderPercent = document.getElementById('loader-percent');
-        const divButtonSound = document.querySelector('.button-sound');
-        const enterButton = document.querySelector('.button-enter');
+        // const loaderElement = document.getElementById('loader');
+        // const loaderDisappear = document.querySelector('.loader-disappear');
+        // const loaderBar = document.querySelector('.loader-bar-fill');
+        // const loaderPercent = document.getElementById('loader-percent');
+        // const divButtonSound = document.querySelector('.button-sound');
+        // const enterButton = document.querySelector('.button-enter');
 
-        enterButton.addEventListener('click', () => {
-            loaderElement.style.opacity = '0';
+        // enterButton.addEventListener('click', () => {
+        //     loaderElement.style.opacity = '0';
 
-            setTimeout(() => {
-                loaderElement.remove()
-            }, 2000);
-        });
+        //     setTimeout(() => {
+        //         loaderElement.remove()
+        //     }, 2000);
+        // });
 
-        this.loadingManager = new THREE.LoadingManager(
-            () => {
+        // this.loadingManager = new THREE.LoadingManager(
+        //     () => {
 
-                setTimeout(() => {
-                    loaderDisappear.style.opacity = '0';
-                    divButtonSound.style.opacity = '0.8';
-                }, 500);
-            },
+        //         setTimeout(() => {
+        //             loaderDisappear.style.opacity = '0';
+        //             divButtonSound.style.opacity = '0.8';
+        //         }, 500);
+        //     },
 
-            // Pendant le chargement
-            (url, itemsLoaded, itemsTotal) => {
-                const progress = itemsLoaded / itemsTotal;
+        //     // Pendant le chargement
+        //     (url, itemsLoaded, itemsTotal) => {
+        //         const progress = itemsLoaded / itemsTotal;
 
-                loaderBar.style.transform = `scaleX(${progress})`;
+        //         loaderBar.style.transform = `scaleX(${progress})`;
                 
-                // loaderPercent.textContent = `${Math.floor(progress * 100)}%`;
-                loaderPercent.textContent = `${(progress * 100).toFixed(2)} %`;
-            }
-        );     
+        //         // loaderPercent.textContent = `${Math.floor(progress * 100)}%`;
+        //         loaderPercent.textContent = `${(progress * 100).toFixed(2)} %`;
+        //     }
+        // );     
 
     }
 

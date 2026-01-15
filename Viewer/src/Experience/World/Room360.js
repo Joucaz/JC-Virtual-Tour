@@ -31,6 +31,7 @@ export default class Room360 {
      * Créer la sphère 360°
      */
     createRoom() {
+        // console.log('🔵 createRoom appelé avec imageUrl:', this.imageUrl)
         // 1. Créer la géométrie (sphère de rayon 500)
         this.geometry = new THREE.SphereGeometry(
             500,    // Rayon - assez grand pour envelopper la caméra
@@ -48,9 +49,15 @@ export default class Room360 {
         this.texture = this.textureLoader.load(
             this.imageUrl,
             
-            // Callback de succès
-            () => {
+            // Callback de succès - CONFIGURER LA TEXTURE ICI
+            (loadedTexture) => {
                 console.log('✅ Texture chargée:', this.imageUrl)
+                
+                // Configuration APRÈS chargement
+                loadedTexture.colorSpace = THREE.SRGBColorSpace
+                loadedTexture.minFilter = THREE.LinearFilter
+                loadedTexture.magFilter = THREE.LinearFilter
+                
                 this.isLoaded = true
                 
                 // Cacher le loader HTML
@@ -75,7 +82,7 @@ export default class Room360 {
         // 5. Créer le matériau
         this.material = new THREE.MeshBasicMaterial({
             map: this.texture,
-            side: THREE.BackSide  // On voit l'intérieur (ou DoubleSide)
+            side: THREE.FrontSide  // On voit l'intérieur (ou DoubleSide)
         })
 
         // 6. Créer le mesh final

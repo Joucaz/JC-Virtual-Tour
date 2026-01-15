@@ -48,10 +48,10 @@ export default class Experience
         /**
          * Helper
          */
-        const axisHelper = new THREE.AxesHelper(5)
-        const gridHelper = new THREE.GridHelper(20,20)
-        this.scene.add(axisHelper)
-        this.scene.add(gridHelper)
+        // const axisHelper = new THREE.AxesHelper(5)
+        // const gridHelper = new THREE.GridHelper(20,20)
+        // this.scene.add(axisHelper)
+        // this.scene.add(gridHelper)
 
 
         // Resize event

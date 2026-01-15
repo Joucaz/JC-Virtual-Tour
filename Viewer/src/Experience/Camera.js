@@ -33,8 +33,8 @@ export default class Camera
 
     setInstance()
     {
-        this.instance = new THREE.PerspectiveCamera(this.baseFOV, this.aspectRatioCamera, 0.1, 100)
-        this.instance.position.set(0, 0, 0)
+        this.instance = new THREE.PerspectiveCamera(this.baseFOV, this.aspectRatioCamera, 0.1, 1000)
+        this.instance.position.set(0.1, 0, 0)
 
         // DON'T WORK WITH ORBIT CONTROLS
         // this.instance.lookAt(new THREE.Vector3(0, 0, 0))
@@ -86,8 +86,8 @@ export default class Camera
         this.controls.rotateSpeed = -0.5        // Vitesse de rotation (négatif = inverser)
         
         // Limites verticales (empêcher de voir le sol/plafond à 90°)
-        this.controls.minPolarAngle = Math.PI * 0.1   // 18° du haut
-        this.controls.maxPolarAngle = Math.PI * 0.9   // 18° du bas
+        // this.controls.minPolarAngle = Math.PI * 0.1   // 18° du haut
+        // this.controls.maxPolarAngle = Math.PI * 0.9   // 18° du bas
     }
 
     resize()
