@@ -10,14 +10,15 @@ import Experience from '../Experience.js'
  * - La caméra est au centre de cette sphère
  */
 export default class Room360 {
-    constructor(imageUrl, roomData = {}) {
+    constructor(textureName, roomData = {}) {  // ← textureName au lieu de imageUrl
         this.experience = new Experience()
         this.scene = this.experience.scene
+        this.resources = this.experience.resources  // ← Accès aux resources
         this.debug = this.experience.debug
         
-        this.imageUrl = imageUrl
+        this.textureName = textureName  // ← Nom dans Resources (ex: "room_abc123")
         this.roomData = roomData
-        this.isLoaded = false
+        this.isLoaded = true  // ← Toujours true car texture déjà chargée
         
         // Debug
         if(this.debug.active) {
@@ -31,7 +32,6 @@ export default class Room360 {
      * Créer la sphère 360°
      */
     createRoom() {
-        // console.log('🔵 createRoom appelé avec imageUrl:', this.imageUrl)
         // 1. Créer la géométrie (sphère de rayon 500)
         this.geometry = new THREE.SphereGeometry(
             500,    // Rayon - assez grand pour envelopper la caméra
@@ -40,49 +40,27 @@ export default class Room360 {
         )
         
         // 2. IMPORTANT : Inverser la sphère pour voir l'intérieur
-        // Normalement une sphère est visible de l'extérieur
-        // On inverse sur l'axe X pour la voir de l'intérieur
         this.geometry.scale(-1, 1, 1)
 
-        // 3. Charger la texture 360°
-        this.textureLoader = new THREE.TextureLoader()
-        this.texture = this.textureLoader.load(
-            this.imageUrl,
-            
-            // Callback de succès - CONFIGURER LA TEXTURE ICI
-            (loadedTexture) => {
-                console.log('✅ Texture chargée:', this.imageUrl)
-                
-                // Configuration APRÈS chargement
-                loadedTexture.colorSpace = THREE.SRGBColorSpace
-                loadedTexture.minFilter = THREE.LinearFilter
-                loadedTexture.magFilter = THREE.LinearFilter
-                
-                this.isLoaded = true
-                
-                // Cacher le loader HTML
-                const loader = document.getElementById('loader')
-                if(loader) loader.style.display = 'none'
-            },
-            
-            // Callback de progression (optionnel)
-            undefined,
-            
-            // Callback d'erreur
-            (error) => {
-                console.error('❌ Erreur chargement texture:', error)
-            }
-        )
+        // 3. ✅ Récupérer la texture DÉJÀ CHARGÉE depuis Resources
+        this.texture = this.resources.items[this.textureName]
+        
+        if(!this.texture) {
+            console.error('❌ Texture introuvable dans Resources:', this.textureName)
+            return
+        }
+        
+        console.log('✅ Texture récupérée depuis Resources:', this.textureName)
 
-        // 4. Configuration de la texture pour un meilleur rendu
-        this.texture.colorSpace = THREE.SRGBColorSpace  // Couleurs correctes (important!)
-        this.texture.minFilter = THREE.LinearFilter     // Filtre quand on s'éloigne
-        this.texture.magFilter = THREE.LinearFilter     // Filtre quand on s'approche
+        // 4. Configuration de la texture (au cas où pas déjà fait)
+        this.texture.colorSpace = THREE.SRGBColorSpace
+        this.texture.minFilter = THREE.LinearFilter
+        this.texture.magFilter = THREE.LinearFilter
 
         // 5. Créer le matériau
         this.material = new THREE.MeshBasicMaterial({
             map: this.texture,
-            side: THREE.FrontSide  // On voit l'intérieur (ou DoubleSide)
+            side: THREE.FrontSide
         })
 
         // 6. Créer le mesh final
@@ -104,42 +82,37 @@ export default class Room360 {
     }
 
     /**
-     * Changer la texture de la room (transition entre pièces)
+     * Changer la texture de la room (maintenant INSTANTANÉ!)
+     * @param {string} newTextureName - Nom de la texture dans Resources
+     * @param {Function} onComplete - Callback optionnel
      */
-    changeTexture(newImageUrl, onLoad = null) {
-        // Fade out progressif (optionnel - on peut faire plus fancy)
-        this.material.opacity = 0.5
+    changeTexture(newTextureName, onComplete = null) {
+        // Récupérer la texture déjà chargée
+        const newTexture = this.resources.items[newTextureName]
         
-        // Charger la nouvelle texture
-        this.textureLoader.load(
-            newImageUrl,
-            (newTexture) => {
-                // Configurer la nouvelle texture
-                newTexture.colorSpace = THREE.SRGBColorSpace
-                newTexture.minFilter = THREE.LinearFilter
-                newTexture.magFilter = THREE.LinearFilter
-                
-                // Remplacer l'ancienne texture
-                if(this.texture) {
-                    this.texture.dispose() // IMPORTANT : libérer la mémoire
-                }
-                
-                this.texture = newTexture
-                this.material.map = newTexture
-                this.material.needsUpdate = true
-                this.material.opacity = 1
-                
-                this.imageUrl = newImageUrl
-                
-                console.log('✅ Room changée vers:', newImageUrl)
-                
-                if(onLoad) onLoad()
-            },
-            undefined,
-            (error) => {
-                console.error('❌ Erreur changement de room:', error)
-            }
-        )
+        if(!newTexture) {
+            console.error('❌ Texture introuvable dans Resources:', newTextureName)
+            return
+        }
+
+        // Configuration
+        newTexture.colorSpace = THREE.SRGBColorSpace
+        newTexture.minFilter = THREE.LinearFilter
+        newTexture.magFilter = THREE.LinearFilter
+        
+        // ⚠️ Ne PAS dispose l'ancienne texture (Resources la gère)
+        
+        // Remplacer la texture
+        this.texture = newTexture
+        this.material.map = newTexture
+        this.material.needsUpdate = true
+        
+        this.textureName = newTextureName
+        
+        console.log('✅ Room changée instantanément vers:', newTextureName)
+        
+        // Appeler le callback immédiatement (pas d'async)
+        if(onComplete) onComplete()
     }
 
     /**
@@ -154,15 +127,12 @@ export default class Room360 {
             this.geometry.dispose()
         }
         
-        // Libérer la texture
-        if(this.texture) {
-            this.texture.dispose()
-        }
-        
         // Libérer le matériau
         if(this.material) {
             this.material.dispose()
         }
+        
+        // ⚠️ Ne PAS dispose la texture ici, Resources s'en occupe
         
         console.log('🗑️ Room360 détruite')
     }

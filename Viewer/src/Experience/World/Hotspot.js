@@ -84,7 +84,7 @@ export default class Hotspot {
         // Stocker les données pour le raycasting
         this.sprite.userData = {
             type: 'hotspot',
-            targetRoom: this.data.targetRoom,
+            target_room_id: this.data.target_room_id,  // ← Utiliser target_room_id
             label: this.data.label,
             hotspotInstance: this
         }

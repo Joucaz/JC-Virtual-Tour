@@ -1,0 +1,63 @@
+{
+    "client": {
+        "name": "Hotel Demo",
+        "branding": {
+            "logo": "/assets/logo.png",
+            "primaryColor": "#D4AF37"
+        }
+    },
+    "tour": {
+        "name": "Chambre Standard",
+        "customModules": []
+    },
+    "rooms": [
+        {
+            "id": "hotel-demo-church",
+            "name": "Church",
+            "image_url": "/assets/tour-demo/church.jpg",
+            "is_start": true,
+            "hotspots": [
+                {
+                    "id": "hs1",
+                    "target_room_id": "hotel-demo-bar",
+                    "position": { "x": 100, "y": 0, "z": -400 },
+                    "label": "Chambre"
+                }
+            ]
+        },
+        {
+            "id": "hotel-demo-bar",
+            "name": "Bar",
+            "image_url": "/assets/tour-demo/warm_bar.jpg",
+            "is_start": false,
+            "hotspots": [
+                {
+                    "id": "hs2",
+                    "target_room_id": "hotel-demo-church",
+                    "position": { "x": -100, "y": 0, "z": 400 },
+                    "label": "Retour Entrée"
+                },
+                {
+                    "id": "hs3",
+                    "target_room_id": "hotel-demo-restaurant",
+                    "position": { "x": 200, "y": 0, "z": -300 },
+                    "label": "Salle de bain"
+                }
+            ]
+        },
+        {
+            "id": "hotel-demo-restaurant",
+            "name": "Restaurant",
+            "image_url": "/assets/tour-demo/warm_restaurant_night.jpg",
+            "is_start": false,
+            "hotspots": [
+                {
+                    "id": "hs4",
+                    "target_room_id": "hotel-demo-bar",
+                    "position": { "x": 0, "y": 0, "z": 400 },
+                    "label": "Retour Chambre"
+                }
+            ]
+        }
+    ]
+}

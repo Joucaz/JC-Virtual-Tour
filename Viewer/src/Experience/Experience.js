@@ -15,7 +15,7 @@ let instance = null
 
 export default class Experience
 {
-    constructor(_canvas)
+    constructor(_canvas, tourConfig = null)
     {
         // Singleton
         if(instance)
@@ -41,7 +41,7 @@ export default class Experience
             
         this.input = new Input()
 
-        this.world = new World()
+        // this.world = new World()
 
         this.renderer = new Renderer()
 
@@ -53,6 +53,14 @@ export default class Experience
         // this.scene.add(axisHelper)
         // this.scene.add(gridHelper)
 
+        // if(tourConfig) {
+        //     this.loadTour(tourConfig)
+        // }
+        if(!tourConfig) {
+            this.loadDevTour()
+        } else {
+            this.loadTour(tourConfig)
+        }
 
         // Resize event
         this.sizes.on('resize', () =>
@@ -67,6 +75,37 @@ export default class Experience
         })
     }
 
+    async loadDevTour() {
+        // Mode dev : charger depuis un fichier JSON local
+        const response = await fetch('/config/tour-demo.json')
+        const tourConfig = await response.json()
+        this.loadTour(tourConfig)
+    }
+
+    async loadTour(tourConfig) {
+        console.log("loadttour");
+        
+        // 1. Générer les sources dynamiquement depuis la config
+        const sources = this.generateSources(tourConfig)
+        
+        // 2. Créer Resources avec ces sources
+        this.resources = new Resources(sources)
+        
+        // 3. Attendre que tout soit chargé
+        this.resources.on('ready', () => {
+            // 4. Créer le World (qui créera les rooms)
+            this.world = new World(tourConfig)
+        })
+    }
+
+    generateSources(tourConfig) {
+        return tourConfig.rooms.map(room => ({
+            name: `room_${room.id}`,
+            type: 'texture',
+            path: room.image_url
+        }))
+    }
+
     resize()
     {
         this.camera.resize()
@@ -77,7 +116,7 @@ export default class Experience
     {
         this.stats.update()
         this.camera.update()
-        this.world.update()
+        // this.world.update()
         this.renderer.update()
     }
 

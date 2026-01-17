@@ -155,7 +155,7 @@ export default class Raycaster {
                 // On utilise un événement custom JavaScript
                 window.dispatchEvent(new CustomEvent('hotspotClicked', {
                     detail: {
-                        targetRoom: userData.targetRoom,
+                        target_room_id: clickedObject.userData.target_room_id, 
                         label: userData.label
                     }
                 }))
